@@ -1,0 +1,67 @@
+# Docker commands
+
+docker run -it --rm --name=redis-server -p 6379:6379 redislabs/redismod
+docker run -it --rm --name=redis-server -p 6379:6379 redis/redis-stack-server:6.2.0
+
+docker run -it --rm --net=host --name=redis-cli redis redis-cli -h localhost -p 6379
+docker run -it --rm --net=host --name=redis-cli redis/redis-stack-server:6.2.0 redis-cli -h localhost -p 6379
+
+# Redis CLI
+FT.DROPINDEX ix-movies DD
+FT.CREATE ix-movies ON JSON PREFIX 1 movies: SCHEMA $.title AS title TEXT $.rating AS rating NUMERIC $.year AS year NUMERIC
+
+json.set movies:1 $ '{"title":"Gulp","year":2005,"rating":1}'
+json.set movies:2 $ '{"title":"Gulp","year":2004,"rating":2}'
+json.set movies:3 $ '{"title":"Gulp","year":2003,"rating":3}'
+json.set movies:4 $ '{"title":"Gulp","year":2002,"rating":4}'
+json.set movies:5 $ '{"title":"Gulp","year":2001,"rating":5}'
+
+json.set actors:1 $ '{"firstname":"Loo","lastname":"Foo","yearOfBirth":1978}'
+json.set actors:2 $ '{"firstname":"Loo","lastname":"Foo","yearOfBirth":1979}'
+json.set actors:3 $ '{"firstname":"Loo","lastname":"Foo","yearOfBirth":1980}'
+json.set actors:4 $ '{"firstname":"Loo","lastname":"Foo","yearOfBirth":1981}'
+json.set actors:5 $ '{"firstname":"Loo","lastname":"Foo","yearOfBirth":1982}'
+
+FT.SEARCH ix-actors @firstname:(Loo)
+FT.SEARCH ix-movies @title:(Gulp)
+
+curl -v http://localhost:8080/api/actors/by-firstname/Loo
+*   Trying ::1:8080...
+* Connected to localhost (::1) port 8080 (#0)
+> GET /api/actors/by-firstname/Loo HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.77.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200
+< Vary: Origin
+< Vary: Access-Control-Request-Method
+< Vary: Access-Control-Request-Headers
+< Content-Type: application/json
+< Transfer-Encoding: chunked
+< Date: Mon, 28 Mar 2022 19:31:28 GMT
+<
+* Connection #0 to host localhost left intact
+[{"id":1,"firstname":"Loo","lastname":"Foo","yearOfBirth":1978},{"id":2,"firstname":"Loo","lastname":"Foo","yearOfBirth":1979},{"id":3,"firstname":"Loo","lastname":"Foo","yearOfBirth":1980},{"id":4,"firstname":"Loo","lastname":"Foo","yearOfBirth":1981},{"id":5,"firstname":"Loo","lastname":"Foo","yearOfBirth":1982}]%
+
+curl -v http://localhost:8080/api/movies/by-title/Gulp
+*   Trying ::1:8080...
+* Connected to localhost (::1) port 8080 (#0)
+> GET /api/movies/by-title/Gulp HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.77.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200
+< Vary: Origin
+< Vary: Access-Control-Request-Method
+< Vary: Access-Control-Request-Headers
+< Content-Type: application/json
+< Transfer-Encoding: chunked
+< Date: Mon, 28 Mar 2022 19:31:41 GMT
+<
+* Connection #0 to host localhost left intact
+[{"id":1,"title":"Gulp","rating":1,"year":2005},{"id":2,"title":"Gulp","rating":2,"year":2004},{"id":3,"title":"Gulp","rating":3,"year":2003},{"id":4,"title":"Gulp","rating":4,"year":2002},{"id":5,"title":"Gulp","rating":5,"year":2001}]%
+
